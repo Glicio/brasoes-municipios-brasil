@@ -4,7 +4,7 @@ Coletor e acervo de brasoes municipais brasileiros a partir de dados do Wikidata
 
 ## Arquivos
 
-- `brasoes/`: imagens ja coletadas.
+- `brasoes/`: ~3600 imagens já coletadas.
 - `brasoes/download-state.json`: estado incremental dos downloads, indexado por `COD_IBGE`, `UF` e `MUNICIPIO`.
 - `main.js`: script de coleta, retry, retomada e conversao para PNG.
 

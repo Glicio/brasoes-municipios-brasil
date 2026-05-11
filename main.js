@@ -8,13 +8,11 @@ const DOWNLOAD_STATE_PATH = path.join(DOWNLOAD_DIR, "download-state.json");
 
 const QUERY_TIMEOUT_MS = 90000;
 const QUERY_RETRY_BASE_DELAY_MS = 5000;
-const QUERY_RETRY_MAX_DELAY_MS = 60000;
-const MAX_QUERY_ATTEMPTS = 5;
+const MAX_QUERY_ATTEMPTS = 10;
 const DOWNLOAD_TIMEOUT_MS = 90000;
-const DOWNLOAD_DELAY_MS = 2000;
+const DOWNLOAD_DELAY_MS = 10000;
 const DOWNLOAD_RETRY_BASE_DELAY_MS = 5000;
-const DOWNLOAD_RETRY_MAX_DELAY_MS = 60000;
-const MAX_DOWNLOAD_ATTEMPTS = 5;
+const MAX_DOWNLOAD_ATTEMPTS = 10;
 
 let sharp;
 
@@ -142,14 +140,11 @@ function parseRetryAfterMs(value) {
   return Math.max(0, retryDate - Date.now());
 }
 
-function getBackoffDelayMs(attempt, baseDelayMs, maxDelayMs, retryAfterMs) {
-  const exponentialDelayMs = Math.min(
-    maxDelayMs,
-    baseDelayMs * 2 ** (attempt - 1)
-  );
+function getBackoffDelayMs(attempt, baseDelayMs, retryAfterMs) {
+  const exponentialDelayMs = baseDelayMs * 2 ** (attempt - 1);
 
   if (retryAfterMs !== null) {
-    return Math.min(maxDelayMs, Math.max(exponentialDelayMs, retryAfterMs));
+    return Math.max(exponentialDelayMs, retryAfterMs);
   }
 
   return exponentialDelayMs;
@@ -175,7 +170,6 @@ async function fetchWithRetry(
   {
     timeoutMs = DOWNLOAD_TIMEOUT_MS,
     retryBaseDelayMs = DOWNLOAD_RETRY_BASE_DELAY_MS,
-    retryMaxDelayMs = DOWNLOAD_RETRY_MAX_DELAY_MS,
     maxAttempts = MAX_DOWNLOAD_ATTEMPTS,
     label = "request",
     readBody = null,
@@ -223,7 +217,6 @@ async function fetchWithRetry(
       const delayMs = getBackoffDelayMs(
         attempt,
         retryBaseDelayMs,
-        retryMaxDelayMs,
         retryAfterMs
       );
 
@@ -443,7 +436,6 @@ try {
     {
       timeoutMs: QUERY_TIMEOUT_MS,
       retryBaseDelayMs: QUERY_RETRY_BASE_DELAY_MS,
-      retryMaxDelayMs: QUERY_RETRY_MAX_DELAY_MS,
       maxAttempts: MAX_QUERY_ATTEMPTS,
       label: "consulta Wikidata",
       readBody: (response) => response.json(),
